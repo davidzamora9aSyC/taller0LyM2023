@@ -1,25 +1,18 @@
 # Lista de comandos aceptados por el robot
-commands = {
-    'MOVE' : True,
-    'RIGHT' : True,
-    'LEFT' : True,
-    'ROTATE' : True,
-    'LOOK' : True,
-    'DROP' : True,
-    'FREE' : True,
-    'PICK' : True,
-    'POP' : True,
-    'CHECK' : True,
-    'BLOCKEDP' : True,
-    'NOP' : True,
-    'REPEAT' : True,
-    'IF' : True,
-    'DEFINE' : True,
-    'TO' : True,
-    'OUTPUT' : True,
-    'END' : True
-}
-
+commands = [
+    'assingTo',
+    'goto',
+    'move',
+    'turn',
+    'face',
+    'put',
+    'pick',
+    'moveToThe',
+    'moveInDir',
+    'jumpToThe',
+    'jumpInDir',
+    'nop',
+]
 #Lista de comandos para la instrucción Look
 lookCommands = {
     'N' : True,
@@ -27,7 +20,18 @@ lookCommands = {
     'W' : True,
     'S' : True
 }
+#Lista de condiciones
 
+conditions=[
+    'facing',
+    'canPut',
+    'canPick',
+    'canMoveDir',
+    'canJumpInDir',
+    'canMoveToThe',
+    'canJumpToThe',
+    'not'
+]
 #Lista de comandos para la instrucción Check
 checkCommands = {
     'C' : True,
