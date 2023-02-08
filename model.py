@@ -145,7 +145,7 @@ def procedureVerif(programList):
     if nameVerif(primeraLinea[0]) == False:
         return False
     complementoPrimeraLinea = primeraLinea[1].strip(' ')
-    
+
 
 
 def nameVerif(string:str):
@@ -153,7 +153,7 @@ def nameVerif(string:str):
     i = len(string)
     if string[0] in alphabet:
         while j < i:
-            if string[j] in alphabet or string[j] in numbers:
+            if string[j].lower() in alphabet or string[j] in numbers:
                 return True
     return False
 
