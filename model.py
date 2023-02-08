@@ -84,7 +84,9 @@ def verifyProgram():
         
             programString += line #Se añade cada línea leída al String que contiene todo
 
+    programString=programString.strip('\n')
     programList = programString.split('\n')
+    
     i=0
     while i < len(programList):
         
@@ -116,7 +118,7 @@ def verifyProgram():
 
             for nombre in variables:
                 if nombre[0].lower() not in alphabet:  #revisa que los nombres empiecen con una letra
-                    print(nombre[0])
+                    
                     verificado = False
                 for character in nombre:        #revisa que los nombres solo contengan letras o numeros
                     if character.lower() not in alphabet and character not in numbers:
@@ -124,27 +126,76 @@ def verifyProgram():
         if i==2:
             if programList[2] != 'PROCS':
                 verificado = False
+        
         if i==3:
             break
+        
             
         i+=1
 
     programList= programList[3:]
-    if procedureVerif(programList) == False:
+    #print(programList)
+    print(procedureVerif(programList, verificado))
+    ''' 
+    
+    verificacionProcedimiento, procedimiento = procedureVerif(programList, verificado)
+    if procedureVerif(programList, verificado)[0] == False:
         verificado = False
-        
-
-    print(programList)
+    '''
+    
+   
     if verificado == True:
         return "Correcto"
-
+    
     return 'ESCRIBA BIEN'
 
-def procedureVerif(programList):
+def procedureVerif(programList, verificado):
     primeraLinea = programList[0].split(' ',1)
+    
+    
     if nameVerif(primeraLinea[0]) == False:
-        return False
+        verificado =  False
+    
     complementoPrimeraLinea = primeraLinea[1].strip(' ')
+    
+
+    if complementoPrimeraLinea[0] != '[':
+        verificado = False
+
+    programList[0] = complementoPrimeraLinea
+    
+    cadena = ''
+    for elemento in programList:
+        cadena += elemento
+   
+    
+    
+    abiertos =0
+    cerrados =0
+    k=0
+    procedimiento='AAAAAAA'
+    cadena = cadena.replace(' ','')
+    
+    while k < len(cadena):
+        
+        
+        if cadena[k] == '[':
+            abiertos +=1
+        if cadena[k] == ']':
+            cerrados +=1
+        
+        
+        if abiertos == cerrados and k>0:
+            #return cerrados, abiertos, 'b'
+            procedimiento = cadena[1:k]
+            break
+        
+        k+=1
+    return procedimiento
+        
+    return abiertos, cerrados,k
+        
+    return verificado, procedimiento
 
 
 
