@@ -135,7 +135,7 @@ def verifyProgram():
 
     programList= programList[3:]
     #print(programList)
-    print(procedureVerif(programList, verificado))
+    print(aislarProcedimiento(programList, verificado))
     ''' 
     
     verificacionProcedimiento, procedimiento = procedureVerif(programList, verificado)
@@ -149,7 +149,7 @@ def verifyProgram():
     
     return 'ESCRIBA BIEN'
 
-def procedureVerif(programList, verificado):
+def aislarProcedimiento(programList, verificado):
     primeraLinea = programList[0].split(' ',1)
     
     
@@ -173,7 +173,7 @@ def procedureVerif(programList, verificado):
     abiertos =0
     cerrados =0
     k=0
-    procedimiento='AAAAAAA'
+    procedimiento=''
     cadena = cadena.replace(' ','')
     
     while k < len(cadena):
@@ -191,11 +191,39 @@ def procedureVerif(programList, verificado):
             break
         
         k+=1
-    return procedimiento
-        
-    return abiertos, cerrados,k
-        
-    return verificado, procedimiento
+    
+    return verificarProc(procedimiento,verificado)
+
+
+def verificarProc(procedimiento, verificado):
+    
+    if procedimiento[0] != '|':
+        verificado=False
+    
+
+    abiertos = 0
+    j=0
+    ultPos=0
+
+    while j< len(procedimiento):
+        if procedimiento[j] == '|':
+            abiertos +=1
+            if abiertos ==2:
+                ultPos = j
+
+        if abiertos >2:
+            verificado = False
+            
+            break
+        j+=1
+
+    parametrosString = procedimiento[1:ultPos]
+    paramList=parametrosString.split(',')
+    for param in paramList:
+        if nameVerif(param) == False:
+            verificado = False
+
+    return verificado
 
 
 
