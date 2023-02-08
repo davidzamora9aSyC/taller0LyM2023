@@ -124,15 +124,40 @@ def verifyProgram():
         if i==2:
             if programList[2] != 'PROCS':
                 verificado = False
-                
-        
+        if i==3:
+            break
+            
         i+=1
+
+    programList= programList[3:]
+    if procedureVerif(programList) == False:
+        verificado = False
+        
 
     print(programList)
     if verificado == True:
         return "Correcto"
 
     return 'ESCRIBA BIEN'
+
+def procedureVerif(programList):
+    primeraLinea = programList[0].split(' ',1)
+    if nameVerif(primeraLinea[0]) == False:
+        return False
+    complementoPrimeraLinea = primeraLinea[1].strip(' ')
+    
+
+
+def nameVerif(string:str):
+    j=0
+    i = len(string)
+    if string[0] in alphabet:
+        while j < i:
+            if string[j] in alphabet or string[j] in numbers:
+                return True
+    return False
+
+    
    
 
 print(verifyProgram())
