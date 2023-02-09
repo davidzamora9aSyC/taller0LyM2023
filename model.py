@@ -223,7 +223,21 @@ def verificarProc(procedimiento, verificado):
         if nameVerif(param) == False:
             verificado = False
 
-    return verificado
+
+    return verifInstruction(procedimiento, verificado)
+
+def verifInstruction(procedimiento, verificado):
+    verifCommand()
+    verifControlStructure()
+
+def verifControlStructure():
+    'a'
+
+def verifCommand(string):
+    res = False
+    if string in commands:
+        res = True
+    return res
 
 
 
