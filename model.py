@@ -13,7 +13,9 @@ commands = [
     'jumpInDir',
     'nop',
 ]
-
+directions = [
+    "front", "right", "left", "back", "around"
+]
 alphabet = [
     'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z'
 ]
@@ -23,10 +25,10 @@ numbers = [
 ]
 #Lista de comandos para la instrucción Look
 lookCommands = {
-    'N' : True,
-    'E' : True,
-    'W' : True,
-    'S' : True
+    'north' : True,
+    'east' : True,
+    'west' : True,
+    'south' : True
 }
 #Lista de condiciones
 
@@ -196,7 +198,7 @@ def aislarProcedimiento(programList, verificado):
 
 
 def verificarProc(procedimiento, verificado):
-    
+    verificado = True 
     if procedimiento[0] != '|':
         verificado=False
     
@@ -222,16 +224,56 @@ def verificarProc(procedimiento, verificado):
     for param in paramList:
         if nameVerif(param) == False:
             verificado = False
+    procedimientoNuevo = procedimiento[ultPos+1:]
+    a = procedimientoNuevo.split(";")
+
+    print(procedimientoNuevo)
+    return paramList, a
+
+def verifInstruction(procedimiento, verificado, variables):
+    comandos = procedimiento.split(";")
+    for comando in comandos:
+        separarComando = comando.split(":")
+        nombreComando = separarComando[0]
+        variablesComando1 = separarComando[1].split(",")
+        if nombreComando in commands:
+            verificarCommand(nombreComando, variablesComando1, verificado, variables)
+        if nombreComando=="if":
 
 
-    return verifInstruction(procedimiento, verificado)
+def verificarCommand(nombreComando, variablesComando, verificado, variables):
+    if len(variablesComando)==1:
+        variable1=variablesComando[0]
+    else:
+        variable2=variablesComando[1]
+    if nombreComando=="move" and (variable1.type()!=int or variable1 not in variables):
+        verificado=False
+    elif nombreComando=="turn" and variable1 not in directions:
+        verificado=False
+    elif nombreComando=="face" and variable1 not in lookCommands:
+        verificado=False
+    elif nombreComando=="movetothe" and (variable2 not in directions or variable1.type()!=int or variable1 not in variables):
+        verificado=False
+    elif nombreComando=="pick" and (variable1.type()!=int or variable1 not in variables or variable2!="chips" or variable2!="balloon"):
+        verificado=False
+    elif nombreComando=="put" and (variable1.type()!=int or variable1 not in variables or variable2!="chips" or variable2!="balloon"):
+        verificado=False
+    elif nombreComando=="moveindir" and (variable2 not in lookCommands or variable1.type()!=int or variable1 not in variables):
+        verificado=False
+    elif nombreComando=="jumptothe" and (variable2 not in directions or variable1.type()!=int or variable1 not in variables):
+        verificado=False
+    elif nombreComando=="moveindir" and (variable2 not in lookCommands or variable1.type()!=int or variable1 not in variables):
+        verificado=False
+    elif nombreComando=="goto" and (variable2.type()!=int or variable1.type()!=int or variable1 not in variables or variable2 not in variables):
+        verificado=False
+    
+    return verificado
 
-def verifInstruction(procedimiento, verificado):
-    verifCommand()
-    verifControlStructure()
 
-def verifControlStructure():
-    'a'
+
+
+
+#def verifControlStructure():
 
 def verifCommand(string):
     res = False
