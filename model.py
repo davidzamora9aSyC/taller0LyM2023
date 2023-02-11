@@ -15,7 +15,7 @@ commands = [
 ]
 
 ctlStructureWords={
-    'if:':['then','else'],
+    'if:':['then:','else:'],
     'while:':'',
     'repeat:':''
 }
@@ -69,14 +69,6 @@ specialChars = [
     ";"
 ]
 
-
-
-def wordInCommands(word):
-    """Verifica si una instrucción se encuentra dentro de la lista de comandos."""
-    if word in commands.keys():
-        return True
-    else:
-        return False
 
 
 def verifyProgram():
@@ -142,33 +134,34 @@ def verifyProgram():
         i+=1
 
     programList= programList[3:]
-    #print(programList)
-    print(aislarProcedimiento(programList, verificado))
-    ''' 
-    
-    verificacionProcedimiento, procedimiento = procedureVerif(programList, verificado)
-    if procedureVerif(programList, verificado)[0] == False:
+
+    #print(aislarProcedimiento(programList))
+
+    if aislarProcedimiento(programList) == False:
         verificado = False
-    '''
-    
+
+        
    
     if verificado == True:
         return "Correcto"
     
     return 'ESCRIBA BIEN'
 
-def aislarProcedimiento(programList, verificado):
+
+
+def aislarProcedimiento(programList):
+    res = True
     primeraLinea = programList[0].split(' ',1)
     
     
     if nameVerif(primeraLinea[0]) == False:
-        verificado =  False
+        res =  False
     
     complementoPrimeraLinea = primeraLinea[1].strip(' ')
     
 
     if complementoPrimeraLinea[0] != '[':
-        verificado = False
+        res = False
 
     programList[0] = complementoPrimeraLinea
     
@@ -182,7 +175,7 @@ def aislarProcedimiento(programList, verificado):
     cerrados =0
     k=0
     procedimiento=''
-    cadena = cadena.replace(' ','')
+    
     
     while k < len(cadena):
         
@@ -199,14 +192,24 @@ def aislarProcedimiento(programList, verificado):
             break
         
         k+=1
+    #print(procedimiento)
+    if findProcedureParameters(procedimiento) == False:
+
+        res = False
     
-    return verificarProc(procedimiento,verificado)
+    if res == False:
+        return False
+    return True
 
 
-def verificarProc(procedimiento, verificado):
-    verificado = True 
+def findProcedureParameters(procedimiento): #obtiene los parametros entre simbolos | de un procedimiento
+    #print('b')
+    
+    procedimiento = procedimiento.lstrip(' ')
+    #print(procedimiento, 'AAAAAAAAAAAAAAAA')
+    res = True    
     if procedimiento[0] != '|':
-        verificado=False
+        res=False
     
 
     abiertos = 0
@@ -220,38 +223,50 @@ def verificarProc(procedimiento, verificado):
                 ultPos = j
 
         if abiertos >2:
-            verificado = False
+            res = False
             
             break
         j+=1
 
-    parametrosString = procedimiento[1:ultPos]
+    parametrosString = procedimiento[1:ultPos] #loque va dentro 
     paramList=parametrosString.split(',')
     for param in paramList:
+        param = param.strip(' ')
         if nameVerif(param) == False:
-            verificado = False
+            res = False
     procedimientoNuevo = procedimiento[ultPos+1:]
-    a = procedimientoNuevo.split(";")
 
-    print(procedimientoNuevo)
-    return paramList, a
+    if verifCommandGeneral(procedimientoNuevo)== False:
+        res = False
 
-def verifCommandGeneral(procedimiento, verificado, variables):
-    comandos = procedimiento.split(";")
+    if res == False:
+        return False
+    #print(procedimientoNuevo)
+    return True
+
+
+def revisarBloque(procedimiento):
+    verifCommandGeneral(procedimiento)
+    verifCtlStructureGeneral(procedimiento)
+
+def verifCommandGeneral(procedimiento): 
+
+    variables = [] #DEFINIR VARIABLES
+    procedimiento = procedimiento.replace(' ','')
+    comandos = procedimiento.split(";")  #entra un string procedimiento y verifica que los comandos que tiene sean correctos
     for comando in comandos:
         separarComando = comando.split(":")
         nombreComando = separarComando[0]
         variablesComando1 = separarComando[1].split(",")
         if nombreComando in commands:
-            verificarCommand(nombreComando, variablesComando1, verificado, variables)
-        ctlStructureB = verifCtlStructure(nombreComando)
+            verificarCommand(nombreComando, variablesComando1, variables)
 
-def verifCtlStructureGeneral(procedimiento):
+def verifCtlStructureGeneral(procedimiento): #entra un procedimineto str, verifica que esten bien
     res=False
     lista = procedimiento.split(' ')
     pos = 0
     wordPos = []
-    ifInNames = False
+    ifInNames = False   #la funcion encuentra las posiciones de las palabras de ctl
     if lista[0] in ctlStructureWords.keys():
         for name in lista:
             if name == 'if:':
@@ -262,22 +277,29 @@ def verifCtlStructureGeneral(procedimiento):
             if name in ctlStructureWords.keys():   #esta parte del codigo pone los indices de las palabras de control en wordPos.
                 wordPos.append(pos)
             pos +=1
-        
     
+    if verifCtlStructure(wordPos, lista) == True:
+        'a'
 
-        
-    
+def verifCtlStructure(wordPos, lista): #wordPos lista con indices de palabras de ctl. Lista es una lista de un procedimiento o un bloque de instrucciones partidas por espacios
+    res = True
+    for pos in wordPos:
+        if lista[pos]=='if:':
+            if wordPos[wordPos.index(pos)+1]!='then:':
+                res = False
+
+            else:
+                nuevoProcedimiento =''
+                for element in lista:
+                     nuevoProcedimiento+=element
+                revisarBloque(nuevoProcedimiento)
             
 
 
-    
-
-
-
-def verificarCommand(nombreComando, variablesComando, verificado, variables):
-    if len(variablesComando)==1:
-        variable1=variablesComando[0]
-    else:
+def verificarCommand(nombreComando, variablesComando, variables):
+    verificado=True
+    variable1=variablesComando[0]
+    if len(variablesComando)>1:
         variable2=variablesComando[1]
     if nombreComando=="move" and (variable1.type()!=int or variable1 not in variables):
         verificado=False
@@ -305,27 +327,17 @@ def verificarCommand(nombreComando, variablesComando, verificado, variables):
 
 
 
-
-#def verifControlStructure():
-
-def verifCommand(string):
-    res = False
-    if string in commands:
-        res = True
-    return res
-
-
-
 def nameVerif(string:str):
     j=0
     i = len(string)
-    if string[0] in alphabet:
+    if string[0].lower() in alphabet:
         while j < i:
             if string[j].lower() in alphabet or string[j] in numbers:
                 return True
+            j +=1
     return False
 
-    
+
    
 
 print(verifyProgram())
