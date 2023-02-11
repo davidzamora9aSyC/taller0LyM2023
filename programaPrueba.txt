@@ -4,7 +4,7 @@ PROCS
 putCB [ |c , b | assignTo : 1 , one ;
 put : c , chips ; put : b , balloons ]
 goNorth [| |
-wh i le : canMovetoThe : 1 , north do: [ moveInDir : 1 , north ]
+while : canMovetoThe : 1 , north do: [ moveInDir : 1 , north ]
 ]
 goWest [ | | i f : canMoveInDir : 1 , west then: [ MoveInDir : 1 ,
 west ] e l s e : [ nop ] ]

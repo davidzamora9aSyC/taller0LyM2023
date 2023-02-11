@@ -13,6 +13,12 @@ commands = [
     'jumpInDir',
     'nop',
 ]
+
+ctlStructureWords={
+    'if:':['then','else'],
+    'while:':'',
+    'repeat:':''
+}
 directions = [
     "front", "right", "left", "back", "around"
 ]
@@ -230,7 +236,7 @@ def verificarProc(procedimiento, verificado):
     print(procedimientoNuevo)
     return paramList, a
 
-def verifInstruction(procedimiento, verificado, variables):
+def verifCommandGeneral(procedimiento, verificado, variables):
     comandos = procedimiento.split(";")
     for comando in comandos:
         separarComando = comando.split(":")
@@ -238,7 +244,34 @@ def verifInstruction(procedimiento, verificado, variables):
         variablesComando1 = separarComando[1].split(",")
         if nombreComando in commands:
             verificarCommand(nombreComando, variablesComando1, verificado, variables)
-        if nombreComando=="if":
+        ctlStructureB = verifCtlStructure(nombreComando)
+
+def verifCtlStructureGeneral(procedimiento):
+    res=False
+    lista = procedimiento.split(' ')
+    pos = 0
+    wordPos = []
+    ifInNames = False
+    if lista[0] in ctlStructureWords.keys():
+        for name in lista:
+            if name == 'if:':
+                ifInNames = True
+            if ifInNames == True:
+                if name in ctlStructureWords['if:']:
+                    wordPos.append(pos)
+            if name in ctlStructureWords.keys():   #esta parte del codigo pone los indices de las palabras de control en wordPos.
+                wordPos.append(pos)
+            pos +=1
+        
+    
+
+        
+    
+            
+
+
+    
+
 
 
 def verificarCommand(nombreComando, variablesComando, verificado, variables):
