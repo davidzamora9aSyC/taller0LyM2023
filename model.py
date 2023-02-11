@@ -147,9 +147,6 @@ def verifyProgram():
 
     if aislarProcedimiento(programList) == False:
         verificado = False
-    
-        
-   
     if verificado == True:
         return "Correcto"
     
@@ -158,13 +155,14 @@ def verifyProgram():
 
 
 def aislarProcedimiento(programList):
+
     res = True
     primeraLinea = programList[0].split(' ',1)
     
     
     if nameVerif(primeraLinea[0]) == False:
         res =  False
-    
+
     complementoPrimeraLinea = primeraLinea[1].strip(' ')
     
 
@@ -199,13 +197,17 @@ def aislarProcedimiento(programList):
             break
         
         k+=1
-    #print(procedimiento)
+
+  
+   
+
     if findProcedureParameters(procedimiento) == False:
 
         res = False
     
     if res == False:
         return False
+
     return True
 
 
@@ -257,7 +259,7 @@ def findProcedureParameters(procedimiento): #obtiene los parametros entre simbol
 
 def revisarBloque(procedimiento):
     res = True
-    if verifCommandGeneral(procedimiento) == True and verifCtlStructureGeneral(procedimiento) ==  False: #ARREGLAAAAAAAAR
+    if verifCommandGeneral(procedimiento) == False and verifCtlStructureGeneral(procedimiento) ==  False:
         res = False
 
     return res
@@ -328,10 +330,42 @@ def verifCtlStructure(wordPos, lista): #wordPos lista con indices de palabras de
                     k+=1                    
                 for element in lista[pos:ultPos]:
                     nuevoProcedimiento +=element
-                revisarBloque(nuevoProcedimiento)
+                if revisarBloque(nuevoProcedimiento) == False:
+                    res = False
 
             condicion = lista[pos+1 : wordPos[wordPos.index(pos)+1]]
-            verificarCondicion(condicion)
+            if verificarCondicion(condicion) == False:
+                res = False
+
+        if lista[pos]=='while:':
+            if lista[wordPos[wordPos.index(pos)+1]]!='do:':
+                res = False
+
+            else:
+                nuevoProcedimiento =''
+                abiertos = 0
+                cerrados =0
+                k=0
+                ultPos=0
+                for element in lista[pos:]:
+                    if element == '[':
+                        abiertos +=1
+                    if element == ']':
+                        cerrados +=1
+                    if abiertos == cerrados and k >0:
+                        ultPos = k
+                    k+=1                    
+                for element in lista[pos:ultPos]:
+                    nuevoProcedimiento +=element
+                if revisarBloque(nuevoProcedimiento) == False:
+                    res = False
+
+            condicion = lista[pos+1 : wordPos[wordPos.index(pos)+1]]
+            if verificarCondicion(condicion) == False:
+                res = False
+        if lista[pos]=='repeat:':
+            if lista[pos+1] not in numbers:
+                res = False
 
     return res
 
