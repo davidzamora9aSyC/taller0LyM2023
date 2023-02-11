@@ -30,12 +30,12 @@ numbers = [
     '1','2','3','4','5','6','7','8','9','0'
 ]
 #Lista de comandos para la instrucción Look
-lookCommands = {
-    'north' : True,
-    'east' : True,
-    'west' : True,
-    'south' : True
-}
+lookCommands = [
+    'north',
+    'east',
+    'west',
+    'south'
+]
 #Lista de condiciones
 
 conditions=[
@@ -69,6 +69,10 @@ specialChars = [
     ";"
 ]
 
+parametrosProc=[
+
+]
+
 
 
 def verifyProgram():
@@ -84,19 +88,20 @@ def verifyProgram():
         
             programString += line #Se añade cada línea leída al String que contiene todo
 
-    programString=programString.strip('\n')
+    programString=programString.strip('\n').lower()
     programList = programString.split('\n')
     
     i=0
     while i < len(programList):
         
-        if programList[0] != 'ROBOT_R' and (i==0): #revisa que el programa empiece con ROBOT_R
+        if programList[0] != 'robot_r' and (i==0): #revisa que el programa empiece con ROBOT_R
             verificado=False
             
-        if programList[1][0:5]!= "VARS " and (i==1): #revisa que la declaracion de variables empiece con VARS
+        if programList[1][0:5]!= "vars " and (i==1): #revisa que la declaracion de variables empiece con VARS
             verificado=False 
         if i ==1:
             variables = programList[1][4:].split(',')
+          
 
             for nombreCandidato in variables:  #revisa que los nombres no contengan espacios en su interior
                 nombre = nombreCandidato.strip(' ')
@@ -114,7 +119,7 @@ def verifyProgram():
                 verificado = False
             else:
                 variables[-1]= variables[-1].replace(';','').strip(' ')
-
+                parametrosProc.append(variables)
 
             for nombre in variables:
                 if nombre[0].lower() not in alphabet:  #revisa que los nombres empiecen con una letra
@@ -124,7 +129,7 @@ def verifyProgram():
                     if character.lower() not in alphabet and character not in numbers:
                         verificado = False
         if i==2:
-            if programList[2] != 'PROCS':
+            if programList[2] != 'procs':
                 verificado = False
         
         if i==3:
@@ -139,7 +144,7 @@ def verifyProgram():
 
     if aislarProcedimiento(programList) == False:
         verificado = False
-
+    
         
    
     if verificado == True:
@@ -187,7 +192,6 @@ def aislarProcedimiento(programList):
         
         
         if abiertos == cerrados and k>0:
-            #return cerrados, abiertos, 'b'
             procedimiento = cadena[1:k]
             break
         
@@ -228,15 +232,16 @@ def findProcedureParameters(procedimiento): #obtiene los parametros entre simbol
             break
         j+=1
 
-    parametrosString = procedimiento[1:ultPos] #loque va dentro 
+    parametrosString = procedimiento[1:ultPos] #lo que va dentro 
     paramList=parametrosString.split(',')
     for param in paramList:
         param = param.strip(' ')
+        parametrosProc.append(param)
         if nameVerif(param) == False:
             res = False
     procedimientoNuevo = procedimiento[ultPos+1:]
 
-    if verifCommandGeneral(procedimientoNuevo)== False:
+    if revisarBloque(procedimientoNuevo)== False:
         res = False
 
     if res == False:
@@ -245,13 +250,19 @@ def findProcedureParameters(procedimiento): #obtiene los parametros entre simbol
     return True
 
 
+
+
 def revisarBloque(procedimiento):
-    verifCommandGeneral(procedimiento)
-    verifCtlStructureGeneral(procedimiento)
+    res = True
+    if verifCommandGeneral(procedimiento) == True and verifCtlStructureGeneral(procedimiento) ==  False: #ARREGLAAAAAAAAR
+        res = False
 
-def verifCommandGeneral(procedimiento): 
+    return res
 
-    variables = [] #DEFINIR VARIABLES
+
+
+def verifCommandGeneral(procedimiento): #ya está
+    res = True
     procedimiento = procedimiento.replace(' ','')
     comandos = procedimiento.split(";")  #entra un string procedimiento y verifica que los comandos que tiene sean correctos
     for comando in comandos:
@@ -259,15 +270,24 @@ def verifCommandGeneral(procedimiento):
         nombreComando = separarComando[0]
         variablesComando1 = separarComando[1].split(",")
         if nombreComando in commands:
-            verificarCommand(nombreComando, variablesComando1, variables)
+            res = verificarCommand(nombreComando, variablesComando1)
+        else: 
+            res = False
+
+    return res
+
 
 def verifCtlStructureGeneral(procedimiento): #entra un procedimineto str, verifica que esten bien
-    res=False
+    res=True
+    
     lista = procedimiento.split(' ')
+   
     pos = 0
     wordPos = []
     ifInNames = False   #la funcion encuentra las posiciones de las palabras de ctl
-    if lista[0] in ctlStructureWords.keys():
+    if len(lista)<1:
+        res = False
+    if lista[0] in ctlStructureWords.keys() and len(lista)>1:
         for name in lista:
             if name == 'if:':
                 ifInNames = True
@@ -278,48 +298,92 @@ def verifCtlStructureGeneral(procedimiento): #entra un procedimineto str, verifi
                 wordPos.append(pos)
             pos +=1
     
-    if verifCtlStructure(wordPos, lista) == True:
-        'a'
+    if verifCtlStructure(wordPos, lista) == False:
+        res = False
+    return res
 
 def verifCtlStructure(wordPos, lista): #wordPos lista con indices de palabras de ctl. Lista es una lista de un procedimiento o un bloque de instrucciones partidas por espacios
     res = True
-    for pos in wordPos:
+    for pos in wordPos:   #wordPos = [1,5,6,9]
         if lista[pos]=='if:':
-            if wordPos[wordPos.index(pos)+1]!='then:':
+            if lista[wordPos[wordPos.index(pos)+1]]!='then:':
                 res = False
 
             else:
                 nuevoProcedimiento =''
-                for element in lista:
-                     nuevoProcedimiento+=element
+                abiertos = 0
+                cerrados =0
+                k=0
+                ultPos=0
+                for element in lista[pos:]:
+                    if element == '[':
+                        abiertos +=1
+                    if element == ']':
+                        cerrados +=1
+                    if abiertos == cerrados and k >0:
+                        ultPos = k
+                    k+=1                    
+                for element in lista[pos:ultPos]:
+                    nuevoProcedimiento +=element
                 revisarBloque(nuevoProcedimiento)
+
+            condicion = lista[pos+1 : wordPos[wordPos.index(pos)+1]]
+            verificarCondicion(condicion)
+
+    return res
+
+def verificarCondicion(condicion):
+    variables= parametrosProc
+    nombre = condicion[0]
+    variable1= condicion[1]
+    variable2 = condicion[3]
+    res = True
+    if nombre=="facing:" and (condicion[1] not in lookCommands):
+        res=False
+    elif nombre=="canput" and ((variable1 not in numbers and variable1 not in variables) or (variable2!="chips" and variable2!="balloons")):
+        res =False
+    elif nombre=="canpick" and ( (variable1 not in numbers and variable1 not in variables) or (variable2!="chips" and variable2!="balloons")):
+        res=False
+    elif nombre=="canmoveindir:" and (variable2 not in lookCommands or (variable1 not in numbers)) :
+        res=False
+    elif nombre=="canjumpindir:" and (variable2 not in lookCommands or (variable1 not in numbers)) :
+        res=False
+    elif nombre=="canmovetothe:" and (variable2 not in directions or (variable1 not in numbers)) :
+        res=False
+    elif nombre=="canjumptothe:" and (variable2 not in directions or (variable1 not in numbers)) :
+        res=False
+    elif nombre=="not:" and verificarCondicion(condicion[4:]) :
+        res=False
+    return res
+
             
 
 
-def verificarCommand(nombreComando, variablesComando, variables):
+def verificarCommand(nombreComando, variablesComando):
+    variables= parametrosProc
     verificado=True
     variable1=variablesComando[0]
     if len(variablesComando)>1:
         variable2=variablesComando[1]
-    if nombreComando=="move" and (variable1.type()!=int or variable1 not in variables):
+    if nombreComando=="move" and (variable1 not in numbers and variable1 not in variables):
         verificado=False
     elif nombreComando=="turn" and variable1 not in directions:
         verificado=False
     elif nombreComando=="face" and variable1 not in lookCommands:
         verificado=False
-    elif nombreComando=="movetothe" and (variable2 not in directions or variable1.type()!=int or variable1 not in variables):
+    elif nombreComando=="movetothe" and (variable2 not in directions or (variable1 not in numbers and variable1 not in variables)):
         verificado=False
-    elif nombreComando=="pick" and (variable1.type()!=int or variable1 not in variables or variable2!="chips" or variable2!="balloon"):
+    elif nombreComando=="pick" and ((variable1 not in numbers and variable1 not in variables) or (variable2!="chips" and variable2!="balloons")):
         verificado=False
-    elif nombreComando=="put" and (variable1.type()!=int or variable1 not in variables or variable2!="chips" or variable2!="balloon"):
+    elif nombreComando=="put" and ( (variable1 not in numbers and variable1 not in variables) or (variable2!="chips" and variable2!="balloons")):
         verificado=False
-    elif nombreComando=="moveindir" and (variable2 not in lookCommands or variable1.type()!=int or variable1 not in variables):
+    elif nombreComando=="moveindir" and (variable2 not in lookCommands or (variable1 not in numbers and variable1 not in variables)):
         verificado=False
-    elif nombreComando=="jumptothe" and (variable2 not in directions or variable1.type()!=int or variable1 not in variables):
+    elif nombreComando=="jumptothe" and (variable2 not in directions or (variable1 not in numbers and variable1 not in variables)):
         verificado=False
-    elif nombreComando=="moveindir" and (variable2 not in lookCommands or variable1.type()!=int or variable1 not in variables):
+    elif nombreComando=="moveindir" and (variable2 not in lookCommands or (variable1 not in numbers and variable1 not in variables)):
         verificado=False
-    elif nombreComando=="goto" and (variable2.type()!=int or variable1.type()!=int or variable1 not in variables or variable2 not in variables):
+    elif nombreComando=="goto" and ( (variable2 not in variables and variable2 not in numbers) or (variable1 not in numbers and variable1 not in variables) ):
         verificado=False
     
     return verificado
@@ -339,5 +403,5 @@ def nameVerif(string:str):
 
 
    
-
+#print(verifCommandGeneral('while: canMovetoThe : 1 , north do: [ moveInDir : 1 , north ]'))
 print(verifyProgram())
