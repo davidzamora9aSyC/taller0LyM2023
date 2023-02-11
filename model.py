@@ -1,4 +1,7 @@
 # Lista de comandos aceptados por el robot
+
+#Juan Andrés Carrasquilla 202110183
+#David Zamora 202113407
 commands = [
     'assingTo',
     'goto',
